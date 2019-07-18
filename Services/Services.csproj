@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="8.1.1" />
+    <PackageReference Include="NEST" Version="7.0.1" />
+    <PackageReference Include="NEST.JsonNetSerializer" Version="7.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common.Attributes\Common.Attributes.csproj" />
+    <ProjectReference Include="..\Common.Extensions\Common.Extensions.csproj" />
+    <ProjectReference Include="..\Common.Models\Common.Models.csproj" />
+    <ProjectReference Include="..\Data\Data\Data.csproj" />
+  </ItemGroup>
+
+</Project>
