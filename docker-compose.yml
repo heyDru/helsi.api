@@ -13,29 +13,32 @@ services:
       - "10000:80"
     depends_on:
       - db
-      - elasticsearch
-  elasticsearch:
+      - es
+  es:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.2.0
     container_name: elastic_search
     volumes:
       - esdata:/usr/share/elasticsearch/data
     environment:
       - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     networks:
       - helsinetwork
     ports:
       - "19200:9200"
   kibana:
-        image: docker.elastic.co/kibana/kibana:7.2.0
-        container_name: kibana_elastic_search
-        ports:
-            - "15601:5601"
-        environment:
-            - ELASTICSEARCH_URL=http://elastic_search:9200
-        networks:
-            - helsinetwork
-        depends_on:
-            - elasticsearch
+    image: docker.elastic.co/kibana/kibana:7.2.0
+    container_name: kibana_elastic_search
+    ports:
+        - "15601:5601"
+    environment:
+        - ELASTICSEARCH_URL=http://localhost:9200
+
+    networks:
+        - helsinetwork
+    depends_on:
+        - es
   db:
     image: "mcr.microsoft.com/mssql/server:2017-latest"
     container_name: sql-server
@@ -51,6 +54,7 @@ services:
 volumes:
     esdata:
         driver: local
+
 networks:
   helsinetwork:
      driver: bridge
