@@ -104,12 +104,27 @@ namespace Services
 
 
 
+            //var searchResult = await _elasticClient.SearchAsync<PatientDto>(s => s
+            //    .From((page - 1) * pageSize)
+            //    .Size(pageSize)
+            //    .Query(qry => qry
+            //        .Match(m => m.Query(query).Fuzziness(Fuzziness.Auto).Operator(Operator.And))));
+
+
+            //.Query(q => q
+            //    .Wildcard(f => f.LastName, "to*", Boost: 1.0)
+
             var searchResult = await _elasticClient.SearchAsync<PatientDto>(s => s
                 .From((page - 1) * pageSize)
                 .Size(pageSize)
-                .Query(qry => qry
-                    .Match(m => m.Query(query).Fuzziness(Fuzziness.Auto).Operator(Operator.And))));
-
+                .Query(qry =>
+                    qry.Wildcard(w =>
+                        w.Field(f => f.FirstName).Boost(1.0).Value(query + "*")
+                            .Rewrite(MultiTermQueryRewrite.TopTermsBoost(10)))
+                    //|| qry.Wildcard(w =>
+                    //    w.Field(f => f.FirstName).Boost(1.0).Value(query + "*")
+                    //        .Rewrite(MultiTermQueryRewrite.TopTermsBoost(10)))
+                            ));
 
             var t3 = await _elasticClient.SearchAsync<PatientDto>(s => s
                 .Query(q => q.Prefix(m => m.Field(f => f.FirstName).Value("one")
@@ -124,20 +139,6 @@ namespace Services
                     qry.Bool(b =>
                         b.Should(m =>
                             m.Term(f => f.Field(n => n.FirstName).Value(query))))));
-            //.(m => m.Query(query).Fuzziness(Fuzziness.Auto).Operator(Operator.And))));
-            //var response = await _elasticClient.SearchAsync< PatientDto > (s => s
-            //    .Index("patient")
-            //    .Query(q => q.QueryString(qs => qs.Query(query + "*"))));
-            //;
-            //var searchResult4 = await _elasticClient.SearchAsync<Patient>(s => s
-            //    .From((page - 1) * pageSize)
-            //    .Size(pageSize)
-            //    .Query(qry =>
-            //        qry.Match(m => m.Field(f => f.FirstName).Query((query)))
-            //    || qry.Match(m => m.Field(f => f.LastName).Query(query))
-            //    || qry.Match(m => m.Field(f => f.Phone).Query(query))
-            //    || qry.Match(m => m.Field(f => f.Birthday).Query(query))));
-
 
             if (!searchResult.Documents.Any())
             {
@@ -149,25 +150,11 @@ namespace Services
                 SearchOperationStatus.Success.GetDescription(), searchResult.Documents); ;
         }
 
-        //private IQueryContainer CreateSimpleQueryUsingAnd(Patient patient)
-        //{
-        //    QueryContainer queryContainer = null;
-
-        //    queryContainer &= new TermQuery() { Field = "_id", Value = patient.Id };
-
-        //    queryContainer &= new TermQuery() { Field = "firstName", Value = patient.FirstName };
-
-        //    queryContainer &= new TermQuery() { Field = "lastName", Value = patient.LastName };
-
-        //    queryContainer &= new TermQuery() { Field = "birthday", Value = patient.Birthday };
-
-        //    queryContainer &= new TermQuery() { Field = "phone", Value = patient.Phone };
-
-        //    return queryContainer;
-        //}
-
         public async Task<ServiceBaseResult<CreateOperationStatus>> CreatePatient(PatientDto patientDto)
         {
+            try
+            {
+
             var checkPatient = await _patientRepository.GetByPhone(patientDto.Phone);
             if (checkPatient != null)
             {
@@ -181,6 +168,13 @@ namespace Services
             var result = await _elasticClient.IndexDocumentAsync(patient);
             return new ServiceBaseResult<CreateOperationStatus>(CreateOperationStatus.Ok,
                 CreateOperationStatus.Ok.GetDescription());
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         public async Task<ServiceBaseResult<UpdateStatus>> UpdatePatient(PatientDto patientDto)

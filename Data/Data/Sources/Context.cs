@@ -25,7 +25,7 @@ namespace Data.Sources
                     patient.Property(p => p.Birthday);
                     patient.Property(p => p.Gender).HasDefaultValue(Gender.Other);
                     patient.Property(p => p.Phone);
-                    //patient.Property(p => p.Activated);
+                    patient.Property(p => p.Activated);
                 }
             );
         }
