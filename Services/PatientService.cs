@@ -46,45 +46,14 @@ namespace Services
 
         public async Task<ServiceBaseResult<SearchOperationStatus, IReadOnlyCollection<PatientDto>>> Search(string query, int page, int pageSize)
         {
-          
             var searchResult = await _elasticClient.SearchAsync<PatientDto>(s => s
-                .From((page - 1) * pageSize)
-                .Size(pageSize)
-                .Query(qry =>
-                    qry.Wildcard(w => w.Name("patient").Field(f => f.FirstName).Boost(1.5).Value(query + "*")
-                            .Rewrite(MultiTermQueryRewrite.TopTermsBoost(10)))
-                            //|| qry.Wildcard(w =>
-                            //    w.Field(f => f.FirstName).Boost(1.0).Value(query + "*")
-                            //        .Rewrite(MultiTermQueryRewrite.TopTermsBoost(10)))
-                            ));
-
-
-            var searchResult3 = await _elasticClient.SearchAsync<PatientDto>(s => s
                 .From((page - 1) * pageSize)
                 .Size(pageSize)
                 .Query(qry =>
                         qry.QueryString(q =>
                             q.Fields(f =>
-                                f.Fields(a=>a.FirstName,a=>a.LastName,a=>a.Phone)).Query(query + "*"))
-
-                //|| qry.Wildcard(w =>
-                //    w.Field(f => f.FirstName).Boost(1.0).Value(query + "*")
-                //        .Rewrite(MultiTermQueryRewrite.TopTermsBoost(10)))
+                                f.Fields(a => a.FirstName, a => a.LastName, a => a.Phone)).Query("*" + query + "*"))
                 ));
-
-            var t3 = await _elasticClient.SearchAsync<PatientDto>(s => s
-                .Query(q => q.Prefix(m => m.Field(f => f.FirstName).Value("one")
-                ))
-            );
-
-
-            var searchResult2 = await _elasticClient.SearchAsync<PatientDto>(s => s
-                .From((page - 1) * pageSize)
-                .Size(pageSize)
-                .Query(qry =>
-                    qry.Bool(b =>
-                        b.Should(m =>
-                            m.Term(f => f.Field(n => n.FirstName).Value(query))))));
 
             if (!searchResult.Documents.Any())
             {
@@ -98,35 +67,23 @@ namespace Services
 
         public async Task<ServiceBaseResult<CreateOperationStatus>> CreatePatient(PatientDto patientDto)
         {
-            await ReIndex();
-            try
+            var checkPatient = await _patientRepository.GetByPhone(patientDto.Phone);
+            if (checkPatient != null)
             {
-
-                var checkPatient = await _patientRepository.GetByPhone(patientDto.Phone);
-                if (checkPatient != null)
-                {
-                    return new ServiceBaseResult<CreateOperationStatus>(CreateOperationStatus.PatientExists,
-                        CreateOperationStatus.PatientExists.GetDescription().Replace("<PHONE>", patientDto.Phone));
-                }
-
-                var patient = _mapper.Map<Patient>(patientDto);
-                patient.UserId = Guid.NewGuid().ToString();
-                await _patientRepository.Create(patient);
-                await _elasticClient.IndexDocumentAsync(patientDto);
-                return new ServiceBaseResult<CreateOperationStatus>(CreateOperationStatus.Ok,
-                    CreateOperationStatus.Ok.GetDescription());
-
+                return new ServiceBaseResult<CreateOperationStatus>(CreateOperationStatus.PatientExists,
+                    CreateOperationStatus.PatientExists.GetDescription().Replace("<PHONE>", patientDto.Phone));
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+
+            var patient = _mapper.Map<Patient>(patientDto);
+            patient.UserId = Guid.NewGuid().ToString();
+            await _patientRepository.Create(patient);
+            await _elasticClient.IndexDocumentAsync(patientDto);
+            return new ServiceBaseResult<CreateOperationStatus>(CreateOperationStatus.Ok,
+                CreateOperationStatus.Ok.GetDescription());
         }
 
         public async Task<ServiceBaseResult<UpdateStatus>> UpdatePatient(PatientDto patientDto)
         {
-            //TODO Validate patientDto
             var checkPatient = await _patientRepository.GetByUserId(patientDto.UserId);
             if (checkPatient == null)
             {
