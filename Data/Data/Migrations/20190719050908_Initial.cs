@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Data.Migrations
 {
-    public partial class initial : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -18,8 +18,9 @@ namespace Data.Migrations
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true),
                     Birthday = table.Column<DateTime>(nullable: false),
-                    Gender = table.Column<int>(nullable: false),
-                    Phone = table.Column<string>(nullable: true)
+                    Gender = table.Column<int>(nullable: false, defaultValue: 3),
+                    Phone = table.Column<string>(nullable: true),
+                    Activated = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {

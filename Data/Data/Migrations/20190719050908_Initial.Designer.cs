@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20190706113811_initial")]
-    partial class initial
+    [Migration("20190719050908_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -27,11 +27,15 @@ namespace Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<bool>("Activated");
+
                     b.Property<DateTime>("Birthday");
 
                     b.Property<string>("FirstName");
 
-                    b.Property<int>("Gender");
+                    b.Property<int>("Gender")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(3);
 
                     b.Property<string>("LastName");
 

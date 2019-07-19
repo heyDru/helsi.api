@@ -25,11 +25,15 @@ namespace Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<bool>("Activated");
+
                     b.Property<DateTime>("Birthday");
 
                     b.Property<string>("FirstName");
 
-                    b.Property<int>("Gender");
+                    b.Property<int>("Gender")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(3);
 
                     b.Property<string>("LastName");
 

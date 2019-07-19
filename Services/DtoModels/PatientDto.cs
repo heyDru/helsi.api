@@ -9,7 +9,7 @@ namespace Services.DtoModels
     [ElasticsearchType(RelationName = "patient")]
     public class PatientDto
     {
-        [Text(Name = "userId")]
+        [Text(Name = "userid")]
         public string UserId { get; set; }
 
         [Required]
