@@ -8,5 +8,7 @@ namespace Common.Enums
         NotFound = 0,
         [Description("Patients found")]
         Success = 1,
+        [Description("Search request is incorrect")]
+        IncorrectRequest = 2
     }
 }

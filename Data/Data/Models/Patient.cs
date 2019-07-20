@@ -1,12 +1,12 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using Common.Enums;
 
 namespace Data.Models
 {
     public class Patient
     {
-        public long Id { get; set; }
-
+        [Key]
         public string UserId { get; set; }
 
         public string FirstName { get; set; }

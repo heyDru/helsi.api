@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common.Enums;
+using Common.Models.SearchModels;
 using Common.Models.ServiceReponses;
 using Services.DtoModels;
 
@@ -19,7 +20,7 @@ namespace Services.Abstractions
         //This method added just in case if we need some special logic or buissnes procces for activating 
         Task<ServiceBaseResult<PatientActivatingStatus>> ActivatePatient(string userId);
 
-        Task<ServiceBaseResult<SearchOperationStatus, IReadOnlyCollection<PatientDto>>> Search(string query, int page, int pageSize);
+        Task<ServiceBaseResult<SearchOperationStatus, IReadOnlyCollection<PatientSearchDocument>>> Search(string query, int page, int pageSize);
 
         Task ReIndex();
     }

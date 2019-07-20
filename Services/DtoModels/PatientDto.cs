@@ -6,27 +6,22 @@ using Nest;
 
 namespace Services.DtoModels
 {
-    [ElasticsearchType(RelationName = "patient")]
     public class PatientDto
     {
-        [Text(Name = "userid")]
         public string UserId { get; set; }
 
         [Required]
         [MinLength(3)]
         [MaxLength(256)]
-        [Text(Name = "firstName")]
         public string FirstName { get; set; }
 
         [Required]
         [MinLength(3)]
         [MaxLength(256)]
-        [Text(Name = "lastName")]
         public string LastName { get; set; }
 
         [Required]
         [AdultValidate(ErrorMessage = "Age must be greater than 18")]
-        [Text(Name = "birthday")]
         public DateTime Birthday { get; set; }
 
         public Gender Gender { get; set; }
@@ -34,7 +29,7 @@ namespace Services.DtoModels
         [Required]
         [MinLength(3)]
         [MaxLength(256)]
-        [Text(Name = "phone")]
+        [PhoneValidate(ErrorMessage = "Incorrect phone format")]
         public string Phone { get; set; }
 
         public bool Activated { get; set; }

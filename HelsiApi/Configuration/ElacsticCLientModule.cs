@@ -1,6 +1,7 @@
 ﻿using System;
 using Autofac;
 using Autofac.Builder;
+using Common.Models.SearchModels;
 using Data.Models;
 using Microsoft.Extensions.Configuration;
 using Nest;
@@ -32,7 +33,7 @@ namespace HelsiApi.Configuration
 
                 var settings = new ConnectionSettings(new Uri(baseUrl))
                     .DefaultIndex(defaultIndex)
-                    .DefaultMappingFor<PatientDto>(x=>x.IndexName("patient"))
+                    .DefaultMappingFor<PatientSearchDocument>(x=>x.IndexName("patient").IdProperty(p=>p.UserId))
                     .DefaultFieldNameInferrer(x=>x.ToLowerInvariant());
 
                 var client = new ElasticClient(settings);

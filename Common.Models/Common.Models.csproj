@@ -5,4 +5,18 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Dtos\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common.Enums\Common.Enums.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Nest">
+      <HintPath>..\..\..\Users\Andrew\.nuget\packages\nest\7.0.1\lib\netstandard2.0\Nest.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

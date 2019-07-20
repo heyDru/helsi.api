@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Common.Enums;
 using Common.Extensions;
+using Common.Models.SearchModels;
 using Common.Models.ServiceReponses;
-using Data.Models;
 using Data.Repos.Abstractions;
-using Nest;
 using Services.Abstractions;
 using Services.DtoModels;
-using Patient = Data.Models.Patient;
+using Data.Models;
 
 namespace Services
 {
@@ -20,13 +18,13 @@ namespace Services
     {
         private readonly IPatientRepository _patientRepository;
         private readonly IMapper _mapper;
-        private readonly IElasticClient _elasticClient;
+        private readonly ISearchable<PatientSearchDocument> _patientSearch;
 
-        public PatientService(IPatientRepository patientRepository, IMapper mapper, IElasticClient elasticClient)
+        public PatientService(IPatientRepository patientRepository, IMapper mapper, ISearchable<PatientSearchDocument> patientSearch)
         {
             _patientRepository = patientRepository;
             _mapper = mapper;
-            _elasticClient = elasticClient;
+            _patientSearch = patientSearch;
         }
 
         public async Task<ServiceBaseResult<SearchOperationStatus, List<PatientDto>>> GetAll()
@@ -44,25 +42,12 @@ namespace Services
                 SearchOperationStatus.Success.GetDescription(), patientDto);
         }
 
-        public async Task<ServiceBaseResult<SearchOperationStatus, IReadOnlyCollection<PatientDto>>> Search(string query, int page, int pageSize)
+        public async Task<ServiceBaseResult<SearchOperationStatus, IReadOnlyCollection<PatientSearchDocument>>> Search(string query, int page, int pageSize)
         {
-            var searchResult = await _elasticClient.SearchAsync<PatientDto>(s => s
-                .From((page - 1) * pageSize)
-                .Size(pageSize)
-                .Query(qry =>
-                        qry.QueryString(q =>
-                            q.Fields(f =>
-                                f.Fields(a => a.FirstName, a => a.LastName, a => a.Phone)).Query("*" + query + "*"))
-                ));
+            var searchResult = await _patientSearch.Search(query, page, pageSize, x => x.FirstName, x => x.Birthday,
+                x => x.LastName, x => x.Phone);
 
-            if (!searchResult.Documents.Any())
-            {
-                return new ServiceBaseResult<SearchOperationStatus, IReadOnlyCollection<PatientDto>>(SearchOperationStatus.NotFound,
-                    SearchOperationStatus.NotFound.GetDescription());
-            }
-
-            return new ServiceBaseResult<SearchOperationStatus, IReadOnlyCollection<PatientDto>>(SearchOperationStatus.Success,
-                SearchOperationStatus.Success.GetDescription(), searchResult.Documents); ;
+            return searchResult;
         }
 
         public async Task<ServiceBaseResult<CreateOperationStatus>> CreatePatient(PatientDto patientDto)
@@ -77,24 +62,31 @@ namespace Services
             var patient = _mapper.Map<Patient>(patientDto);
             patient.UserId = Guid.NewGuid().ToString();
             await _patientRepository.Create(patient);
-            await _elasticClient.IndexDocumentAsync(patientDto);
+
+            var searchDoc = _mapper.Map<PatientSearchDocument>(patient);
+            await _patientSearch.AddToSearch(searchDoc);
+
             return new ServiceBaseResult<CreateOperationStatus>(CreateOperationStatus.Ok,
                 CreateOperationStatus.Ok.GetDescription());
         }
 
         public async Task<ServiceBaseResult<UpdateStatus>> UpdatePatient(PatientDto patientDto)
         {
-            var checkPatient = await _patientRepository.GetByUserId(patientDto.UserId);
-            if (checkPatient == null)
+            var patient = await _patientRepository.GetByUserId(patientDto.UserId);
+            if (patient == null)
             {
                 return new ServiceBaseResult<UpdateStatus>(UpdateStatus.NotFound,
                     UpdateStatus.NotFound.GetDescription());
             }
 
-            patientDto.Activated = checkPatient.Activated;
-            var patient = _mapper.Map<Patient>(patientDto);
+            //patient = _mapper.Map<Patient>(patientDto);
+            patient = _mapper.Map(patientDto, patient);
+
             await _patientRepository.Update(patient);
-            await _elasticClient.UpdateAsync<Patient>(patient, u => u.Doc(patient));
+
+            var searchDoc = _mapper.Map<PatientSearchDocument>(patient);
+            await _patientSearch.UpdateSearchDoc(searchDoc);
+
             return new ServiceBaseResult<UpdateStatus>(UpdateStatus.Ok,
                 UpdateStatus.Ok.GetDescription());
         }
@@ -110,7 +102,10 @@ namespace Services
 
             patient.Activated = false;
             await _patientRepository.Update(patient);
-            await _elasticClient.UpdateAsync<Patient>(patient, u => u.Doc(patient));
+
+            var searchDoc = _mapper.Map<PatientSearchDocument>(patient);
+            await _patientSearch.UpdateSearchDoc(searchDoc);
+
             return new ServiceBaseResult<PatientActivatingStatus>(PatientActivatingStatus.Diactivated,
                 PatientActivatingStatus.Diactivated.GetDescription());
         }
@@ -128,24 +123,19 @@ namespace Services
 
             patient.Activated = true;
             await _patientRepository.Update(patient);
-            await _elasticClient.UpdateAsync<Patient>(patient, u => u.Doc(patient));
+
+            var searchDoc = _mapper.Map<PatientSearchDocument>(patient);
+            await _patientSearch.UpdateSearchDoc(searchDoc);
+
             return new ServiceBaseResult<PatientActivatingStatus>(PatientActivatingStatus.Diactivated,
                 PatientActivatingStatus.Diactivated.GetDescription());
         }
 
         public async Task ReIndex()
         {
-            await _elasticClient.DeleteByQueryAsync<PatientDto>(q => q.MatchAll());
-
             var allPatients = await _patientRepository.GetAll();
-
-            var dtos = _mapper.Map<List<PatientDto>>(allPatients);
-
-            foreach (var patient in dtos)
-            {
-                await _elasticClient.IndexDocumentAsync(patient);
-            }
-
+            var documentsModel = _mapper.Map<List<PatientSearchDocument>>(allPatients);
+            await _patientSearch.ReIndex(documentsModel);
         }
     }
 }

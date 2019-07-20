@@ -17,8 +17,7 @@ namespace Data.Sources
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Patient>(patient =>
                 {
-                    patient.HasKey(k => k.Id);
-                    patient.Property(p => p.Id);
+                    patient.HasKey(p => p.UserId);
                     patient.Property(p => p.UserId);
                     patient.Property(p => p.FirstName);
                     patient.Property(p => p.LastName);

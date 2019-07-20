@@ -78,11 +78,9 @@ namespace HelsiApi.Controllers
             }
         }
 
-        [ProducesResponseType(typeof(ServiceBaseResult<UpdateStatus>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ServiceBaseResult<UpdateStatus>), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(ServiceBaseResult<UpdateStatus>), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        [HttpDelete("{id}")]
+        [HttpDelete("{userId}")]
         public async Task<IActionResult> Diactivate(string userId)
         {
             var result = await _patientService.DeactivatePatient(userId);
@@ -116,5 +114,18 @@ namespace HelsiApi.Controllers
                     return BadRequest(result);
             }
         }
+
+
+        [HttpGet("reindex")]
+        [ProducesResponseType(typeof(ServiceBaseResult<SearchOperationStatus, List<PatientDto>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ServiceBaseResult<CreateOperationStatus>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ServiceBaseResult<CreateOperationStatus>), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Reindex()
+        {
+            await _patientService.ReIndex();
+            return Ok();
+        }
+
     }
 }
