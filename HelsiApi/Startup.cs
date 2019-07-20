@@ -43,21 +43,23 @@ namespace HelsiApi
 
             services.AddMvc(options => { options.Filters.Add<ValidateModelStateAttribute>(); }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            services.AddSwaggerGen(config =>
-            {
-                config.SwaggerDoc("v1", new Info
-                {
-                    Title = "Helsi Demo API",
-                    Version = "v1"
-                });
+            services.AddSwaggerDocument();
 
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.XML";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            //services.AddSwaggerGen(config =>
+            //{
+            //    config.SwaggerDoc("v1", new Info
+            //    {
+            //        Title = "Helsi Demo API",
+            //        Version = "v1"
+            //    });
 
-                config.IncludeXmlComments(xmlPath);
+            //    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.XML";
+            //    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
 
-                config.DescribeAllEnumsAsStrings();
-            } );
+            //    config.IncludeXmlComments(xmlPath);
+
+            //    config.DescribeAllEnumsAsStrings();
+            //} );
 
                 
 
@@ -84,12 +86,15 @@ namespace HelsiApi
                 app.UseHsts();
             }
 
-            app.UseSwagger();
-            app.UseSwaggerUI(config =>
-            {
-                config.SwaggerEndpoint("/swagger/v1/swagger.json","Helsi Swagger API");
-                config.RoutePrefix = "swagger";
-            });
+            app.UseOpenApi();
+            app.UseSwaggerUi3();
+
+            //app.UseSwagger();
+            //app.UseSwaggerUI(config =>
+            //{
+            //    config.SwaggerEndpoint("/swagger/v1/swagger.json","Helsi Swagger API");
+            //    config.RoutePrefix = "swagger";
+            //});
             app.UseHttpsRedirection();
             app.UseMvc();
         }
