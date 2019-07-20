@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using AutoMapper;
-using Common.Models.SearchModels;
 using Data.Models;
 using Services.DtoModels;
+using Services.SearchModels;
 
 namespace Services.Mapper.Profiles
 {

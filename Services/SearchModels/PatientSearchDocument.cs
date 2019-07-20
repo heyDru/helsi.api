@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Common.Enums;
 using Nest;
 
-namespace Common.Models.SearchModels
+namespace Services.SearchModels
 {
     [ElasticsearchType(RelationName = "patient")]
     public class PatientSearchDocument

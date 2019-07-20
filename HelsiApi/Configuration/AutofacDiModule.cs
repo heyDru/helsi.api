@@ -1,10 +1,10 @@
 ﻿using Autofac;
-using Common.Models.SearchModels;
 using Data.Repos;
 using Data.Repos.Abstractions;
 using Services;
 using Services.Abstractions;
 using Services.Mapper;
+using Services.SearchModels;
 
 namespace HelsiApi.Configuration
 {

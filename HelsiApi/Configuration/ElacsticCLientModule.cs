@@ -1,11 +1,11 @@
 ﻿using System;
 using Autofac;
 using Autofac.Builder;
-using Common.Models.SearchModels;
 using Data.Models;
 using Microsoft.Extensions.Configuration;
 using Nest;
 using Services.DtoModels;
+using Services.SearchModels;
 
 namespace HelsiApi.Configuration
 {

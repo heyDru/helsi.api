@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Common.Enums;
 using Common.Extensions;
-using Common.Models.SearchModels;
 using Common.Models.ServiceReponses;
 using Data.Repos.Abstractions;
 using Services.Abstractions;
 using Services.DtoModels;
 using Data.Models;
+using Services.SearchModels;
 
 namespace Services
 {

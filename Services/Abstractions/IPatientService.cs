@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common.Enums;
-using Common.Models.SearchModels;
 using Common.Models.ServiceReponses;
 using Services.DtoModels;
+using Services.SearchModels;
 
 namespace Services.Abstractions
 {

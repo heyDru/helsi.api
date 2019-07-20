@@ -21,7 +21,7 @@ namespace HelsiApi.Midleware.ExceptionHandler
             }
             catch (Exception exception)
             {
-                await context.Response.WriteAsync("Something goes wrong.");
+                await context.Response.WriteAsync($"Something goes wrong. Message ={exception.Message} ------------  InnerException Message  ={exception.InnerException.Message}");
             }
         }
     }
